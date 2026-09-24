@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Notes Organizer</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f7fb;
+        }
+
+        header {
+            background: #2563eb;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        nav {
+            background: white;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        nav a {
+            margin: 0 12px;
+            text-decoration: none;
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 25px auto;
+        }
+
+        .box {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 15px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        textarea {
+            height: 120px;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+        }
+
+        .note {
+            border: 1px solid #ddd;
+            padding: 18px;
+            margin-top: 15px;
+            border-radius: 8px;
+        }
+
+        .high {
+            border-left: 6px solid red;
+        }
+
+        .medium {
+            border-left: 6px solid orange;
+        }
+
+        .low {
+            border-left: 6px solid green;
+        }
+
+        .actions a {
+            margin-right: 10px;
+            text-decoration: none;
+            color: #2563eb;
+        }
+
+        .delete {
+            color: red !important;
+        }
+
+        .summary {
+            margin-top: 20px;
+            padding: 18px;
+            background: #eef5ff;
+            border-radius: 8px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Smart Notes Organizer</h1>
+    <p>Keep your notes organized, simple and smart.</p>
+</header>
+
+<nav>
+    <a href="/">🏠 Dashboard</a>
+    <a href="#add">➕ Add Note</a>
+    <a href="#notes">📝 My Notes</a>
+    <a href="#important">⭐ Important</a>
+    <a href="#categories">📚 Categories</a>
+    <a href="#ai">🤖 AI Summarize</a>
+</nav>
+
+<div class="container">
+
+    <div class="box">
+        <h2>Welcome 📝</h2>
+
+        <input
+            type="text"
+            id="search"
+            placeholder="🔍 Search your notes..."
+            onkeyup="searchNotes()"
+        >
+    </div>
+
+
+    <!-- ADD NOTE -->
+
+    <div class="box" id="add">
+
+        <h2>➕ Add Note</h2>
+
+        <form action="/add" method="POST">
+
+            <label>Title</label>
+
+            <input
+                type="text"
+                name="title"
+                placeholder="Enter note title"
+                required
+            >
+
+            <label>Note</label>
+
+            <textarea
+                name="content"
+                placeholder="Write your note..."
+                required
+            ></textarea>
+
+            <label>Category</label>
+
+            <select name="category">
+
+                <option value="Study">Study</option>
+
+                <option value="Programming">
+                    Programming
+                </option>
+
+                <option value="Personal">
+                    Personal
+                </option>
+
+                <option value="Ideas">
+                    Ideas
+                </option>
+
+            </select>
+
+            <label>Priority</label>
+
+            <select name="priority">
+
+                <option value="High">
+                    🔴 High
+                </option>
+
+                <option value="Medium" selected>
+                    🟡 Medium
+                </option>
+
+                <option value="Low">
+                    🟢 Low
+                </option>
+
+            </select>
+
+            <button type="submit">
+                💾 Save Note
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- MY NOTES -->
+
+    <div class="box" id="notes">
+
+        <h2>📝 My Notes</h2>
+
+        {% if notes %}
+
+            {% for note in notes %}
+
+                <div class="note
+                    {% if note[5] == 'High' %}
+                        high
+                    {% elif note[5] == 'Low' %}
+                        low
+                    {% else %}
+                        medium
+                    {% endif %}
+                ">
+
+                    <h3>{{ note[1] }}</h3>
+
+                    <p>{{ note[2] }}</p>
+
+                    <p>
+                        📚 Category:
+                        <strong>{{ note[3] }}</strong>
+                    </p>
+
+                    <p>
+                        🎯 Priority:
+                        <strong>{{ note[5] }}</strong>
+                    </p>
+
+                    {% if note[4] == 1 %}
+                        <p>⭐ Important</p>
+                    {% endif %}
+
+                    <div class="actions">
+
+                        <a href="/edit/{{ note[0] }}">
+                            ✏️ Edit
+                        </a>
+
+                        <a href="/important/{{ note[0] }}">
+                            ⭐ Important
+                        </a>
+
+                        <a
+                            class="delete"
+                            href="/delete/{{ note[0] }}"
+                        >
+                            🗑️ Delete
+                        </a>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No notes available.</p>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- IMPORTANT -->
+
+    <div class="box" id="important">
+
+        <h2>⭐ Important Notes</h2>
+
+        {% for note in notes %}
+
+            {% if note[4] == 1 %}
+
+                <p>
+                    ⭐ <strong>{{ note[1] }}</strong>
+                </p>
+
+            {% endif %}
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- CATEGORIES -->
+
+    <div class="box" id="categories">
+
+        <h2>📚 Categories</h2>
+
+        <p>Study</p>
+        <p>Programming</p>
+        <p>Personal</p>
+        <p>Ideas</p>
+
+    </div>
+
+
+    <!-- AI SUMMARIZE -->
+
+    <div class="box" id="ai">
+
+        <h2>🤖 AI Summarize</h2>
+
+        <p>
+            Select a note and let AI create a clear, short summary.
+        </p>
+
+        <select id="noteSelect">
+
+            <option value="">
+                -- Select a Note --
+            </option>
+
+            {% for note in notes %}
+
+                <option value="{{ note[2] }}">
+                    {{ note[1] }}
+                </option>
+
+            {% endfor %}
+
+        </select>
+
+        <button onclick="aiSummarize()">
+            🤖 AI Summarize
+        </button>
+
+        <div
+            id="loading"
+            style="display:none;"
+        >
+            ⏳ Creating summary...
+        </div>
+
+        <div
+            id="summary"
+            class="summary"
+            style="display:none;"
+        ></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function searchNotes() {
+
+    let input =
+        document.getElementById("search")
+        .value
+        .toLowerCase();
+
+    let notes =
+        document.querySelectorAll(".note");
+
+    notes.forEach(function(note) {
+
+        let text =
+            note.innerText.toLowerCase();
+
+        if (text.includes(input)) {
+            note.style.display = "";
+        } else {
+            note.style.display = "none";
+        }
+
+    });
+}
+
+
+function aiSummarize() {
+
+    let content =
+        document.getElementById("noteSelect").value;
+
+    let summary =
+        document.getElementById("summary");
+
+    let loading =
+        document.getElementById("loading");
+
+    if (!content) {
+
+        alert("Please select a note first.");
+
+        return;
+    }
+
+    loading.style.display = "block";
+    summary.style.display = "none";
+
+    fetch("/ai-summarize", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            content: content
+        })
+
+    })
+
+    .then(response => response.json())
+
+    .then(data => {
+
+        loading.style.display = "none";
+
+        summary.style.display = "block";
+
+        if (data.success) {
+
+            summary.innerText =
+                "✨ Summary:\n\n" +
+                data.summary;
+
+        } else {
+
+            summary.innerText =
+                "❌ " + data.message;
+        }
+
+    })
+
+    .catch(error => {
+
+        loading.style.display = "none";
+
+        summary.style.display = "block";
+
+        summary.innerText =
+            "❌ Something went wrong.";
+
+    });
+}
+
+</script>
+
+</body>
+</html>
